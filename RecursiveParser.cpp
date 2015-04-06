@@ -1,7 +1,5 @@
-
 //
 //  RecursiveParser.cpp
-//  446_A7
 //
 //  Created by Tyler McEntee on 3/16/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.
@@ -41,9 +39,9 @@ RecursiveParser::RecursiveParser(Global & global_init, LexicalAnalyzer & lex_ini
    filename = lex->filename;
    
    //couldn't get rfind() and replace() working together so this is what I did.
-   for(int i = 0; i < filename.length(); i++)
+   for (int i = 0; i < filename.length(); i++)
    {
-      if(filename[i] == '.')
+      if (filename[i] == '.')
       {
          filename.replace(filename.begin() + i, filename.end(), ".tac");
          i = 50000;
@@ -83,7 +81,8 @@ void RecursiveParser::end()
    writeToFile();
    
    EntryPtr peek = symtab->lookup("main");
-   if(peek->TypeOfEntry != functionEntry)
+
+   if (peek->TypeOfEntry != functionEntry)
    {
       cout << "ERROR - Function 'main' not found." << endl;
       raise(SIGINT);
@@ -97,11 +96,9 @@ void RecursiveParser::end()
  ******************************************************************************/
 void RecursiveParser::match(Global::Symbol match)
 {
-   if(match == global->Token)
-   {
-      //DEBUG out << "Matched "<< EnumToString(match) << " with " << EnumToString(global->Token) << endl;
+   if (match == global->Token)
       lex->GetNextToken();
-   }
+
    else
    {
       cout << "ERROR - Token mismatch at line " << lex->line_num << ". Expected: " << EnumToString(match)
@@ -109,10 +106,9 @@ void RecursiveParser::match(Global::Symbol match)
       raise(SIGINT);
    }
    
-   if(global->Token == Global::commentt)
-   {
+   if (global->Token == Global::commentt)
       lex->GetNextToken();
-   }
+
 }
 
 /*******************************************************************************
@@ -136,7 +132,7 @@ void RecursiveParser::PROG()
    int local_vars = 0;
    int param_num = 0;
    
-   if(global->Token == Global::intt || global->Token == Global::floatt || global->Token == Global::chart)
+   if (global->Token == Global::intt || global->Token == Global::floatt || global->Token == Global::chart)
    {
       TYPE(type);
       
@@ -147,7 +143,7 @@ void RecursiveParser::PROG()
       
       match(Global::idt);
       
-      if(global->Token == Global::lparent)
+      if (global->Token == Global::lparent)
       {
          func = true;
          code = "proc " + funcname;
@@ -173,7 +169,7 @@ void RecursiveParser::PROG()
       
       REST(type, offset, paramptr, local_vars, param_num);
       
-      if(func)
+      if (func)
       {
          code = "endp " + funcname;
          emit(code);
@@ -188,7 +184,7 @@ void RecursiveParser::PROG()
    }
    
    //rest is for constant
-   else if(global->Token == Global::constt)
+   else if (global->Token == Global::constt)
    {
       match(Global::constt);
       
@@ -199,7 +195,7 @@ void RecursiveParser::PROG()
       match(Global::idt);
       match(Global::assignopt);
       
-      if(lex->isFloat)
+      if (lex->isFloat)
       {
          ptr->constant.TypeOfConstant = floatType;
          ptr->constant.ValueR = global->ValueR;
@@ -235,10 +231,12 @@ void RecursiveParser::TYPE(VarType & type)
          match(Global::floatt);
          type = floatType;
          break;
+
       case Global::intt:
          match(Global::intt);
          type = intType;
          break;
+
       case Global::chart:
          match(Global::chart);
          type = charType;
@@ -256,7 +254,7 @@ void RecursiveParser::TYPE(VarType & type)
  ******************************************************************************/
 void RecursiveParser::REST(VarType & type, int & offset, ParamPtr & paramptr, int & local_size, int & param_num)
 {
-   if(global->Token == Global::lparent)
+   if (global->Token == Global::lparent)
    {
       depth++;
       offset = 2;
@@ -271,7 +269,7 @@ void RecursiveParser::REST(VarType & type, int & offset, ParamPtr & paramptr, in
       ptr->function.SizeOfLocal = local_size + offset;
       ptr->function.NumberOfParameters = param_num;
       ptr->function.sizeOfParams = param_size;
-      if(param_num == 0)
+      if (param_num == 0)
          base = NULL;
       
 //      cout << "Depth change: " << depth-1 << " to " << depth << ": Enter to Continue"<< endl;
@@ -305,7 +303,7 @@ void RecursiveParser::REST(VarType & type, int & offset, ParamPtr & paramptr, in
  ******************************************************************************/
 void RecursiveParser::PARAMLIST(int & offset, ParamPtr & paramptr, int & local_size, int & param_num, int & param_size)
 {
-   if(global->Token == Global::intt || global->Token == Global::floatt || global->Token == Global::chart)
+   if (global->Token == Global::intt || global->Token == Global::floatt || global->Token == Global::chart)
    {
       EntryPtr ptr;
       VarType type;
@@ -345,7 +343,7 @@ void RecursiveParser::PARAMLIST(int & offset, ParamPtr & paramptr, int & local_s
  ******************************************************************************/
 void RecursiveParser::PARAMTAIL(int & offset, ParamPtr & paramptr, int & local_size, int & param_num, int & param_size)
 {
-   if(global->Token == Global::commat)
+   if (global->Token == Global::commat)
    {
       EntryPtr ptr;
       VarType type;
@@ -414,12 +412,12 @@ void RecursiveParser::DECL(int & offset)
    EntryPtr ptr;
    VarType type;
    
-   if(global->Token == Global::intt || global->Token == Global::floatt || global->Token == Global::chart)
+   if (global->Token == Global::intt || global->Token == Global::floatt || global->Token == Global::chart)
    {
       TYPE(type);
       IDLIST(type, offset);
    }
-   else if(global->Token == Global::constt)
+   else if (global->Token == Global::constt)
    {
       match(Global::constt);
       
@@ -431,7 +429,7 @@ void RecursiveParser::DECL(int & offset)
       match(Global::idt);
       match(Global::assignopt);
       
-      if(lex->isFloat)
+      if (lex->isFloat)
       {
          ptr->constant.TypeOfConstant = floatType;
          ptr->constant.ValueR = global->ValueR;
@@ -485,7 +483,7 @@ void RecursiveParser::IDLIST(VarType & type, int & offset)
  ******************************************************************************/
 void RecursiveParser::IDTAIL(VarType & type, int & offset)
 {
-   if(global->Token == Global::commat)
+   if (global->Token == Global::commat)
    {
       EntryPtr ptr;
       
@@ -516,7 +514,7 @@ void RecursiveParser::IDTAIL(VarType & type, int & offset)
  ******************************************************************************/
 void RecursiveParser::STAT_LIST()
 {
-   if(global->Token == Global::idt || global->Token == Global::cint || global->Token == Global::coutt)
+   if (global->Token == Global::idt || global->Token == Global::cint || global->Token == Global::coutt)
    {
       STATEMENT();
       match(Global::semicolont);
@@ -537,7 +535,7 @@ void RecursiveParser::RET_STAT()
    TableEntry eplace;
    string code;
    
-   if(global->Token == Global::returnt)
+   if (global->Token == Global::returnt)
    {
       match(Global::returnt);
       EXPR(eplace);
@@ -546,6 +544,7 @@ void RecursiveParser::RET_STAT()
       
       if (eplace.depth <= 1)
          code += eplace.Lexeme;
+      
       else
       {
          code += "[bp";
@@ -581,8 +580,9 @@ void RecursiveParser::RET_STAT()
  ******************************************************************************/
 void RecursiveParser::STATEMENT()
 {
-   if(global->Token == Global::idt)
+   if (global->Token == Global::idt)
       ASSIGNSTAT();
+
    else
       IOSTAT();
 }
@@ -602,33 +602,31 @@ void RecursiveParser::ASSIGNSTAT()
    string code;
    TableEntry eplace;
    
-   if(left.depth == depth || left.depth == 1)
+   if (left.depth == depth || left.depth == 1)
    {
       match(Global::idt);
       match(Global::assignopt);
          
-         if(global->Token == Global::idt)
+         if (global->Token == Global::idt)
          {
             TableEntry peek = symtab->lookupT(global->Lexeme);
             EntryType var = peek.TypeOfEntry;
             
-            if(var == functionEntry)
-            {
+            if (var == functionEntry)
                FUNCTIONCALL(left);
-            }
+
             else if (var == varEntry || var == constEntry)
             {
                EXPR(eplace);
                
-               if(left.depth <= 1)
-               {
+               if (left.depth <= 1)
                   code += left.Lexeme;
-               }
+
                else
                {
                   code += "[bp";
                   
-                  if(left.isParam)
+                  if (left.isParam)
                      code += "+";
                   else
                      code += "-";
@@ -636,16 +634,17 @@ void RecursiveParser::ASSIGNSTAT()
                   code += NumberToString(left.var.Offset);
                   code += "]";
                }
+
                code += " = ";
                
                if (eplace.TypeOfEntry == constEntry)
-               {
                   code += eplace.constant.Value;
-               }
+
                else
                {
                   if (eplace.depth <= 1)
                      code += eplace.Lexeme;
+
                   else
                   {
                      code += "[bp";
@@ -670,19 +669,18 @@ void RecursiveParser::ASSIGNSTAT()
             }
          }
       
-         else if(global->Token == Global::numt || global->Token == Global::addopt || global->Token == Global::nott || global->Token == Global::lparent)
+         else if (global->Token == Global::numt || global->Token == Global::addopt || global->Token == Global::nott || global->Token == Global::lparent)
          {
             EXPR(eplace);
             
-            if(left.depth <= 1)
-            {
+            if (left.depth <= 1)
                code += left.Lexeme;
-            }
+
             else
             {
                code += "[bp";
                
-               if(left.isParam)
+               if (left.isParam)
                   code += "+";
                else
                   code += "-";
@@ -692,7 +690,7 @@ void RecursiveParser::ASSIGNSTAT()
             }
             code += " = ";
             
-            if(isSign)
+            if (isSign)
             {
                code += sign;
                isSign = false;
@@ -700,19 +698,17 @@ void RecursiveParser::ASSIGNSTAT()
             
             if (eplace.TypeOfEntry == constEntry)
             {
-               if(eplace.constant.TypeOfConstant == floatType)
-               {
+               if (eplace.constant.TypeOfConstant == floatType)
                   code += NumberToString(eplace.constant.ValueR);
-               }
+
                else
-               {
                   code += NumberToString(eplace.constant.Value);
-               }
             }
             else
             {
                if (eplace.depth <= 1)
                   code += eplace.Lexeme;
+
                else
                {
                   code += "[bp";
@@ -751,10 +747,12 @@ void RecursiveParser::ASSIGNSTAT()
  ******************************************************************************/
 void RecursiveParser::IOSTAT()
 {
-   if(global->Token == Global::cint)
+   if (global->Token == Global::cint)
       IN_STAT();
+
    else if (global->Token == Global::coutt)
       OUT_STAT();
+
    else
    {
       cout << "ERROR: Unexpected symbol " << global->Lexeme << " at line " << lex->line_num << endl;
@@ -782,19 +780,20 @@ void RecursiveParser::IN_STAT()
    
    EntryPtr peek = symtab->lookup(global->Lexeme);
    
-   if(peek->var.TypeOfVariable == intType)
+   if (peek->var.TypeOfVariable == intType)
       code += "i ";
    else
       code += "c ";
    
-   if(peek->depth == 1)
+   if (peek->depth == 1)
    {
       code += peek->Lexeme;
    }
    else
    {
       code += "[bp";
-      if(peek->isParam)
+
+      if (peek->isParam)
          code += "+";
       else
          code += "-";
@@ -824,25 +823,25 @@ void RecursiveParser::IN_END()
    
    code += "rd";
    
-   if(global->Token == Global::instreamt)
+   if (global->Token == Global::instreamt)
    {
       match(Global::instreamt);
       
       EntryPtr peek = symtab->lookup(global->Lexeme);
       
-      if(peek->var.TypeOfVariable == intType)
+      if (peek->var.TypeOfVariable == intType)
          code += "i ";
       else
          code += "c ";
       
-      if(peek->depth == 1)
-      {
+      if (peek->depth == 1)
          code += peek->Lexeme;
-      }
+
       else
       {
          code += "[bp";
-         if(peek->isParam)
+
+         if (peek->isParam)
             code += "+";
          else
             code += "-";
@@ -888,23 +887,23 @@ void RecursiveParser::OUT_OPTIONS()
    
    code += "wr";
    
-   if(global->Token == Global::idt)
+   if (global->Token == Global::idt)
    {
       EntryPtr peek = symtab->lookup(global->Lexeme);
       
-      if(peek->var.TypeOfVariable == intType)
+      if (peek->var.TypeOfVariable == intType)
          code += "i ";
       else
          code += "c ";
       
-      if(peek->depth == 1)
-      {
+      if (peek->depth == 1)
          code += peek->Lexeme;
-      }
+
       else
       {
          code += "[bp";
-         if(peek->isParam)
+
+         if (peek->isParam)
             code += "+";
          else
             code += "-";
@@ -933,7 +932,7 @@ void RecursiveParser::OUT_OPTIONS()
       match(Global::literalt);
       emit(code);
    }
-   else if(global->Token == Global::endlt)
+   else if (global->Token == Global::endlt)
    {
       code += "tln";
       match(Global::endlt);
@@ -956,7 +955,7 @@ void RecursiveParser::OUT_OPTIONS()
  ******************************************************************************/
 void RecursiveParser::OUT_END()
 {
-   if(global->Token == Global::outstreamt)
+   if (global->Token == Global::outstreamt)
    {
       match(Global::outstreamt);
       OUT_OPTIONS();
@@ -1029,6 +1028,7 @@ void RecursiveParser::MORETERM(TableEntry & rplace)
       
       if (temp.depth <= 1)
          code += temp.Lexeme;
+
       else
       {
          code += "[bp-" + NumberToString(temp.var.Offset);
@@ -1037,14 +1037,16 @@ void RecursiveParser::MORETERM(TableEntry & rplace)
       
       code += " = ";
       
-      if(rplace.TypeOfEntry == varEntry)
+      if (rplace.TypeOfEntry == varEntry)
       {
-         if(rplace.depth <= 1)
+         if (rplace.depth <= 1)
             code += rplace.Lexeme;
+
          else
          {
             code += "[bp";
-            if(rplace.isParam)
+
+            if (rplace.isParam)
                code += "+";
             else
                code += "-";
@@ -1053,16 +1055,13 @@ void RecursiveParser::MORETERM(TableEntry & rplace)
             code += "]";
          }
       }
-      else if(rplace.TypeOfEntry == constEntry)
+      else if (rplace.TypeOfEntry == constEntry)
       {
-         if(rplace.constant.TypeOfConstant == floatType)
-         {
+         if (rplace.constant.TypeOfConstant == floatType)
             code += NumberToString(rplace.constant.ValueR);
-         }
+
          else
-         {
             code += NumberToString(rplace.constant.Value);
-         }
       }
       
       code += " " + global->Lexeme + " ";
@@ -1071,14 +1070,16 @@ void RecursiveParser::MORETERM(TableEntry & rplace)
    
       TERM(tplace);
       
-      if(tplace.TypeOfEntry == varEntry)
+      if (tplace.TypeOfEntry == varEntry)
       {
-         if(tplace.depth <= 1)
+         if (tplace.depth <= 1)
             code += tplace.Lexeme;
+
          else
          {
             code += "[bp";
-            if(tplace.isParam)
+
+            if (tplace.isParam)
                code += "+";
             else
                code += "-";
@@ -1087,16 +1088,13 @@ void RecursiveParser::MORETERM(TableEntry & rplace)
             code += "]";
          }
       }
-      else if(tplace.TypeOfEntry == constEntry)
+      else if (tplace.TypeOfEntry == constEntry)
       {
-         if(tplace.constant.TypeOfConstant == floatType)
-         {
+         if (tplace.constant.TypeOfConstant == floatType)
             code += NumberToString(tplace.constant.ValueR);
-         }
+
          else
-         {
             code += NumberToString(tplace.constant.Value);
-         }
       }
       
       rplace = temp;
@@ -1140,10 +1138,9 @@ void RecursiveParser::MOREFACTOR(TableEntry & rplace)
    {
       TableEntry temp = tempVar();
       
-      if(temp.depth <= 1)
-      {
+      if (temp.depth <= 1)
          code += temp.Lexeme;
-      }
+
       else
       {
          code += "[bp-";
@@ -1153,7 +1150,7 @@ void RecursiveParser::MOREFACTOR(TableEntry & rplace)
       
       code += " = ";
       
-      if(isSign)
+      if (isSign)
       {
          code += sign;
          isSign = false;
@@ -1161,26 +1158,26 @@ void RecursiveParser::MOREFACTOR(TableEntry & rplace)
       
       if (rplace.TypeOfEntry == constEntry)
       {
-         if(rplace.constant.TypeOfConstant == floatType)
-         {
+         if (rplace.constant.TypeOfConstant == floatType)
             code += NumberToString(rplace.constant.ValueR);
-         }
+
          else
-         {
             code += NumberToString(rplace.constant.Value);
-         }
       }
       else
       {
          if (rplace.depth <= 1)
             code += rplace.Lexeme;
+
          else
          {
             code += "[bp";
+
             if (rplace.isParam)
                code += "+";
             else
                code += "-";
+
             code += NumberToString(rplace.var.Offset);
             code += "]";
          }
@@ -1194,25 +1191,22 @@ void RecursiveParser::MOREFACTOR(TableEntry & rplace)
       
       if (tplace.TypeOfEntry == constEntry)
       {
-         if(tplace.constant.TypeOfConstant == floatType)
-         {
+         if (tplace.constant.TypeOfConstant == floatType)
             code += NumberToString(tplace.constant.ValueR);
-         }
+
          else
-         {
             code += NumberToString(tplace.constant.Value);
-         }
       }
       else
       {
          if (tplace.depth <= 1)
-         {
             code += tplace.Lexeme;
-         }
+
          else
          {
             code += "[bp";
-            if(tplace.isParam)
+
+            if (tplace.isParam)
                code += "+";
             else
                code += "-";
@@ -1246,7 +1240,8 @@ void RecursiveParser::FACTOR(TableEntry & tplace)
    if (global->Token == Global::idt)
    {
       EntryPtr peek = symtab->lookup(global->Lexeme);
-      if(peek->depth == depth || peek->depth == 1)
+
+      if (peek->depth == depth || peek->depth == 1)
       {
          tplace = symtab->lookupT(global->Lexeme);
          match(Global::idt);
@@ -1261,8 +1256,9 @@ void RecursiveParser::FACTOR(TableEntry & tplace)
    {
       TableEntry temp = tempVar();
       
-      if(temp.depth <= 1)
+      if (temp.depth <= 1)
          code += temp.Lexeme;
+
       else
       {
          code += "[bp-";
@@ -1272,21 +1268,18 @@ void RecursiveParser::FACTOR(TableEntry & tplace)
       
       code += " = ";
       
-      if(lex->isFloat)
-      {
+      if (lex->isFloat)
          code += NumberToString(global->ValueR);
-      }
+
       else
-      {
          code += NumberToString(global->Value);
-      }
       
       tplace = temp;
       emit(code);
       
       match(Global::numt);
    }
-   else if(global->Token == Global::lparent)
+   else if (global->Token == Global::lparent)
    {
       match(Global::lparent);
       EXPR(rplace);
@@ -1309,13 +1302,11 @@ void RecursiveParser::FACTOR(TableEntry & tplace)
 void RecursiveParser::ADDOP()
 {
    if (global->Token == Global::addopt)
-   {
       match(Global::addopt);
-   }
+
    else if (global->Token == Global::relopt)
-   {
       match(Global::relopt);
-   }
+
    else {}
 }
 
@@ -1327,13 +1318,11 @@ void RecursiveParser::ADDOP()
 void RecursiveParser::MULOP()
 {
    if (global->Token == Global::mulopt)
-   {
       match(Global::mulopt);
-   }
+
    else if (global->Token == Global::relopt)
-   {
       match(Global::relopt);
-   }
+
    else {}
 }
 
@@ -1374,23 +1363,24 @@ void RecursiveParser::SIGNOP()
  ******************************************************************************/
 void RecursiveParser::FUNCTIONCALL(TableEntry left1)
 {
-   if(global->Token == Global::idt)
+   if (global->Token == Global::idt)
    {
       EntryPtr peek = symtab->lookup(global->Lexeme);
-      if(peek->TypeOfEntry == functionEntry)
+
+      if (peek->TypeOfEntry == functionEntry)
       {
          string code = "call " + global->Lexeme + '\n';
          
          EntryPtr left = symtab->lookup(left1.Lexeme);
          
          if (left->depth <= 1)
-         {
             code += left->Lexeme;
-         }
+
          else
          {
             code += "[bp";
-            if(left->isParam)
+
+            if (left->isParam)
                code += "+";
             else
                code += "-";
@@ -1433,10 +1423,11 @@ void RecursiveParser::FUNCTIONCALL(TableEntry left1)
  ******************************************************************************/
 void RecursiveParser::PARAMS()
 {
-   if(global->Token == Global::idt)
+   if (global->Token == Global::idt)
    {
       EntryPtr peek = symtab->lookup(global->Lexeme);
-      if(peek->depth == depth || peek->depth == 1)
+
+      if (peek->depth == depth || peek->depth == 1)
       {
          string code;
          
@@ -1444,13 +1435,16 @@ void RecursiveParser::PARAMS()
          
          if (peek->depth <= 1)
             code += peek->Lexeme;
+
          else
          {
             code += "[bp";
+
             if (peek->isParam)
                code += "+";
             else
                code += "-";
+
             code += NumberToString(peek->var.Offset);
             code += "]";
          }
@@ -1465,7 +1459,7 @@ void RecursiveParser::PARAMS()
          raise(SIGINT);
       }
    }
-   else if(global->Token == Global::numt)
+   else if (global->Token == Global::numt)
    {
       string code;
       
@@ -1495,14 +1489,15 @@ void RecursiveParser::PARAMS()
 void RecursiveParser::PARAMSTAIL()
 {
    
-   if(global->Token == Global::commat)
+   if (global->Token == Global::commat)
    {
       match(Global::commat);
       
-      if(global->Token == Global::idt)
+      if (global->Token == Global::idt)
       {
          EntryPtr peek = symtab->lookup(global->Lexeme);
-         if(peek->depth == depth || peek->depth == 1)
+
+         if (peek->depth == depth || peek->depth == 1)
          {
             string code;
             
@@ -1510,13 +1505,16 @@ void RecursiveParser::PARAMSTAIL()
             
             if (peek->depth <= 1)
                code += peek->Lexeme;
+
             else
             {
                code += "[bp";
+
                if (peek->isParam)
                   code += "+";
                else
                   code += "-";
+
                code += NumberToString(peek->var.Offset);
                code += "]";
             }
@@ -1531,7 +1529,7 @@ void RecursiveParser::PARAMSTAIL()
             raise(SIGINT);
          }
       }
-      else if(global->Token == Global::numt)
+      else if (global->Token == Global::numt)
       {
          string code;
          
@@ -1573,7 +1571,7 @@ void RecursiveParser::writeToFile()
    ofstream tac_file;
    tac_file.open(filename.c_str(), ios::trunc);
    
-   for(int i = 0; i < tac_code.size(); i++)
+   for (int i = 0; i < tac_code.size(); i++)
       tac_file << tac_code[i] << endl;
    
    tac_file.close();
@@ -1585,24 +1583,9 @@ void RecursiveParser::writeToFile()
  ***  DESCRIPTION  : gets the size of the VarType for the offset and function size
  ******************************************************************************/
 int RecursiveParser::getsize(VarType type, int & offset)
-{
-   if(type == intType)
-   {
-      offset += 2;
-      return 2;
-   }
-   else if(type == floatType)
-   {
-      offset += 4;
-      return 4;
-   }
-   else if(type == charType)
-   {
-      offset += 1;
-      return 1;
-   }
-   else
-      return 0;
+{ 
+   offset += typesize(type);
+   return typesize(type);
 }
 
 /*******************************************************************************
@@ -1612,11 +1595,11 @@ int RecursiveParser::getsize(VarType type, int & offset)
  ******************************************************************************/
 int RecursiveParser::typesize(VarType type)
 {
-   if(type == intType)
+   if (type == intType)
       return 2;
-   else if(type == floatType)
+   else if (type == floatType)
       return 4;
-   else if(type == charType)
+   else if (type == charType)
       return 1;
    else
       return 0;
@@ -1650,15 +1633,13 @@ TableEntry RecursiveParser::tempVar()
    
    offset += 2;
    
-   for(int i = 0; i < symtab->table_size; i++)
+   for (int i = 0; i < symtab->table_size; i++)
    {
-      for(int k = 0; k < symtab->table[i].size(); k++)
+      for (int k = 0; k < symtab->table[i].size(); k++)
       {
          //if depth found in vector, erase that node
-         if(symtab->table[i][k].depth == depth-1 && symtab->table[i][k].TypeOfEntry == functionEntry)
-         {
+         if (symtab->table[i][k].depth == depth-1 && symtab->table[i][k].TypeOfEntry == functionEntry)
             symtab->table[i][k].function.SizeOfLocal += 2;
-         }
       }
    }
 
@@ -1675,8 +1656,7 @@ void RecursiveParser::checkduplicate(string check, int depth)
 {
    EntryPtr ptr = symtab->lookup(check);
    
-   if(ptr->Lexeme == check && ptr->depth == depth)
-   {
+   if (ptr->Lexeme == check && ptr->depth == depth)
       cout << "ERROR: Duplicate identifier " << check << " at line: " << lex->line_num << endl;
-   }
+
 }

@@ -1,6 +1,5 @@
 //
 //  CodeGen.h
-//  A8
 //
 //  Created by Tyler McEntee on 4/30/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.

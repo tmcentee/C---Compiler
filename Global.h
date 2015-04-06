@@ -1,6 +1,5 @@
 //
 //  Global.h
-//  446_A7
 //
 //  Created by Tyler McEntee on 1/26/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.

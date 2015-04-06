@@ -1,6 +1,5 @@
 //
 //  SymbolTable.h
-//  CSC446_A7
 //
 //  Created by Tyler McEntee on 3/15/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.

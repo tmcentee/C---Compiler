@@ -1,6 +1,5 @@
 //
 //  LexicalAnalyzer.cpp
-//  446_A7
 //
 //  Created by Tyler McEntee on 1/26/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.
@@ -35,7 +34,7 @@ LexicalAnalyzer::LexicalAnalyzer(string source_filename)
    ifstream source_file;
    source_file.open(filename.c_str());
    
-   if(!source_file)
+   if (!source_file)
       cerr << "File not found: " << filename << endl;
    else
    {
@@ -43,8 +42,6 @@ LexicalAnalyzer::LexicalAnalyzer(string source_filename)
       //stringstreams are easier to work with than basic file streams.
       file_stream << source_file.rdbuf();
       source_file.close();
-   
-      //cout << "File:\n" << file_stream.str() << endl;
        
       buildResWords();
    }
@@ -59,17 +56,18 @@ void LexicalAnalyzer::GetNextToken()
 {
     global.Lexeme = string();
    
-    if(file_stream.str().length() == stream_pos)
+    if (file_stream.str().length() == stream_pos)
        done = true;
     
-    while(ch <= ' ' && !done)
+    while (ch <= ' ' && !done)
     {
        GetNextChar();
-       if(file_stream.str().length() <= stream_pos)
+
+       if (file_stream.str().length() <= stream_pos)
           done = true;
     }
    
-   if(!done)
+   if (!done)
    {
       ProcessToken();
    }
@@ -90,7 +88,7 @@ void LexicalAnalyzer::GetNextToken()
 void LexicalAnalyzer::GetNextChar()
 {
    ch = file_stream.get();
-   if(ch == '\n') { line_num++; }
+   if (ch == '\n') { line_num++; }
    stream_pos++;
 }
 
@@ -103,31 +101,35 @@ void LexicalAnalyzer::ProcessToken()
 {
    global.Lexeme += ch;
    
-   if(isalpha(global.Lexeme[0]))
+   if (isalpha(global.Lexeme[0]))
       ProcessWordToken();
    
-   else if(isdigit(global.Lexeme[0]))
+   else if (isdigit(global.Lexeme[0]))
       ProcessNumToken();
    
-   else if(global.Lexeme[0] == '/' && LookAhead() == '*')
+   else if (global.Lexeme[0] == '/' && LookAhead() == '*')
       ProcessComment();
    
-   else if(global.Lexeme[0] == '\'' || global.Lexeme[0] == '\"')
+   else if (global.Lexeme[0] == '\'' || global.Lexeme[0] == '\"')
       ProcessLiteralToken();
    
-   else if(global.Lexeme[0] == '<' || global.Lexeme[0] == '>' || global.Lexeme[0] == '=' || global.Lexeme[0] == '!' ||
+   else if (global.Lexeme[0] == '<' || global.Lexeme[0] == '>' || global.Lexeme[0] == '=' || global.Lexeme[0] == '!' ||
            global.Lexeme[0] == '&' || global.Lexeme[0] == '|')
    {
       char ch_t = global.Lexeme[0];
       
-      if(ch_t == '<' && LookAhead() == '<')
+      if (ch_t == '<' && LookAhead() == '<')
          ProcessStreamOp();
-      else if(ch_t == '>' && LookAhead() == '>')
+
+      else if (ch_t == '>' && LookAhead() == '>')
          ProcessStreamOp();
-      else if((ch_t == '<' || ch_t == '>' || ch_t == '=' || ch_t == '!') && LookAhead() == '=')
+
+      else if ((ch_t == '<' || ch_t == '>' || ch_t == '=' || ch_t == '!') && LookAhead() == '=')
          ProcessDoubleCharToken();
+
       else if ((ch_t == '&' && LookAhead() == '&') || (ch_t == '|' && LookAhead() == '|'))
          ProcessDoubleCharToken();
+
       else
          ProcessSingleCharToken();
    }
@@ -145,10 +147,12 @@ void LexicalAnalyzer::ProcessStreamOp()
 {
    GetNextChar();
    
-   if(global.Lexeme[0] == '>')
+   if (global.Lexeme[0] == '>')
       global.Token = Global::instreamt;
+
    else if (global.Lexeme[0] == '<')
       global.Token = Global::outstreamt;
+
    else
       global.Token = Global::unknownt;
    
@@ -162,10 +166,11 @@ void LexicalAnalyzer::ProcessStreamOp()
  ******************************************************************************/
 void LexicalAnalyzer::ProcessComment()
 {
-   while(!(ch == '*' && LookAhead() == '/'))
+   while (!(ch == '*' && LookAhead() == '/'))
    {
       GetNextChar();
-      if(file_stream.str().length() < stream_pos)
+
+      if (file_stream.str().length() < stream_pos)
       {
          global.Token = Global::unknownt;
          return;
@@ -200,13 +205,13 @@ void LexicalAnalyzer::ProcessWordToken()
 {
    GetNextChar();
    
-   while(isdigit(ch) || isalpha(ch) || ch == '_')
+   while (isdigit(ch) || isalpha(ch) || ch == '_')
    {
       global.Lexeme += ch;
       GetNextChar();
    }
    
-   if(global.Lexeme.length() > 31)
+   if (global.Lexeme.length() > 31)
    {
       global.Lexeme = string("ERROR: LEXEME GREATER THAN 31 CHARACTERS.");
       global.Token = Global::unknownt;
@@ -214,9 +219,9 @@ void LexicalAnalyzer::ProcessWordToken()
    
    else
    {
-      for(int i = Global::ift; i < Global::returnt + 2; i++)
+      for (int i = Global::ift; i < Global::returnt + 2; i++)
       {
-         if(reswords[i] == global.Lexeme)
+         if (reswords[i] == global.Lexeme)
          {
             global.Token = static_cast<Global::Symbol>(i - 1);
             return;
@@ -238,26 +243,26 @@ void LexicalAnalyzer::ProcessNumToken()
    
    isFloat = false;
    
-   while(isdigit(ch))
+   while (isdigit(ch))
    {
       global.Lexeme += ch;
       GetNextChar();
    }
    
-   if(ch == '.')
+   if (ch == '.')
    {
       global.Lexeme += ch;
       
       GetNextChar();
       
-      if(isdigit(ch))
+      if (isdigit(ch))
       {
-         while(isdigit(ch))
+         while (isdigit(ch))
          {
-            if(ch != '\n')
+            if (ch != '\n')
             {
-            global.Lexeme += ch;
-            GetNextChar();
+               global.Lexeme += ch;
+               GetNextChar();
             }
             else
                break;
@@ -271,7 +276,7 @@ void LexicalAnalyzer::ProcessNumToken()
       }
    }
    
-   if(global.Lexeme.length() > 31)
+   if (global.Lexeme.length() > 31)
    {
       global.Lexeme = string("ERROR: LEXEME GREATER THAN 31 CHARACTERS.");
       global.Token = Global::unknownt;
@@ -281,7 +286,7 @@ void LexicalAnalyzer::ProcessNumToken()
    {
       size_t found  = global.Lexeme.find(".");
       
-      if(found < global.Lexeme.length())
+      if (found < global.Lexeme.length())
       {
          global.ValueR = atof(global.Lexeme.c_str());
          isFloat = true;
@@ -308,10 +313,11 @@ void LexicalAnalyzer::ProcessLiteralToken()
    GetNextChar();
    global.Lexeme += ch;
    
-   while(ch != global.Lexeme[0])
+   while (ch != global.Lexeme[0])
    {
       GetNextChar();
-      if(ch == '\n')
+
+      if (ch == '\n')
       {
          illegal = true;
          break;
@@ -320,7 +326,7 @@ void LexicalAnalyzer::ProcessLiteralToken()
       global.Lexeme += ch;
    }
    
-   if(!illegal)
+   if (!illegal)
    {
       global.Token = Global::literalt;
       global.Literal = global.Lexeme;
@@ -422,18 +428,20 @@ void LexicalAnalyzer::ProcessDoubleCharToken()
  ******************************************************************************/
 void LexicalAnalyzer::Print()
 {
-   if(global.Token != Global::commentt)
+   if (global.Token != Global::commentt)
    {
       cout << setw(15) << left << EnumToString(global.Token);
       cout << setw(35) << global.Lexeme;
-      if(global.Token == Global::numt)
+
+      if (global.Token == Global::numt)
       {
-         if(isFloat)
+         if (isFloat)
             cout << setw(35) << global.ValueR;
          else
             cout << setw(35) << global.Value;
       }
-      if(global.Token == Global::literalt)
+
+      if (global.Token == Global::literalt)
          cout << setw(35) << global.Literal;
      
       cout << endl;

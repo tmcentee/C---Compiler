@@ -1,6 +1,5 @@
 //
 //  CodeGen.cpp
-//  A8
 //
 //  Created by Tyler McEntee on 4/30/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.
@@ -41,9 +40,9 @@ CodeGen::CodeGen(Global & global_init, SymbolTable & symtab_init, string tacFile
    filename = tacFile;
    
    //couldn't get rfind() and replace() working together so this is what I did.
-   for(int i = 0; i < filename.length(); i++)
+   for (int i = 0; i < filename.length(); i++)
    {
-      if(filename[i] == '.')
+      if (filename[i] == '.')
       {
          filename.replace(filename.begin() + i, filename.end(), ".asm");
          i = 50000;
@@ -89,11 +88,9 @@ void CodeGen::init()
    //Get first line in the file.
    GetNextLine();
    
-   while(curLine[0] == 'p' && !done)
-   {
+   while (curLine[0] == 'p' && !done)
       proc_init();
       
-   }
    
    final_init();
    
@@ -108,21 +105,21 @@ void CodeGen::data_init()
 {
    string code;
    
-   for(int i = 0; i < symtab->table_size; i++)
+   for (int i = 0; i < symtab->table_size; i++)
    {
       code = "";
       
-      for(int k = 0; k < symtab->table[i].size(); k++)
+      for (int k = 0; k < symtab->table[i].size(); k++)
       {
-         if(symtab->table[i][k].depth == 1 && symtab->table[i][k].TypeOfEntry != functionEntry)
+         if (symtab->table[i][k].depth == 1 && symtab->table[i][k].TypeOfEntry != functionEntry)
          {
-            if(symtab->table[i][k].TypeOfEntry == constEntry)
+            if (symtab->table[i][k].TypeOfEntry == constEntry)
             {
                code += symtab->table[i][k].Lexeme + "\tEQU\t";
                code += num2str(symtab->table[i][k].constant.Value) + "\n";
                emit(code);
             }
-            else if(symtab->table[i][k].TypeOfEntry == literalEntry)
+            else if (symtab->table[i][k].TypeOfEntry == literalEntry)
             {
                code += symtab->table[i][k].Lexeme + "\tDB\t";
                code += symtab->table[i][k].Literal + "," + '"' + "$" + '"';
@@ -163,7 +160,10 @@ void CodeGen::final_init()
 void CodeGen::GetNextChar()
 {
    ch = tacstream.get();
-   if(stream_pos > tacstream.str().length()) { done = true; }
+
+   if (stream_pos > tacstream.str().length()) 
+      done = true;
+
    stream_pos++;
 }
 
@@ -176,7 +176,7 @@ void CodeGen::GetNextLine()
 {
    curLine = string();
    
-   while(ch != '\n' && !done)
+   while (ch != '\n' && !done)
    {
       curLine += ch;
       GetNextChar();
@@ -224,60 +224,40 @@ void CodeGen::proc_init()
    GetNextLine();
    
    size_t found = curLine.find("endp");
-   while(found == std::string::npos)
+   while (found == std::string::npos)
    {
-      if(curLine.find(" + ") != string::npos)
-      {
-         //cout << "Addition Statement: " << curLine << endl;
+      if (curLine.find(" + ") != string::npos)
          addop();
-      }
-      else if(curLine.find("push ") != string::npos)
-      {
+
+      else if (curLine.find("push ") != string::npos)
          pushParam();
-      }
-      else if(curLine.find("call ") != string::npos)
-      {
+
+      else if (curLine.find("call ") != string::npos)
          fnCall();
-      }
-      else if(curLine.find(" - ") != string::npos)
-      {
-         //cout << "Subtraction Statement: " << curLine << endl;
+
+      else if (curLine.find(" - ") != string::npos);
          subop();
-      }
-      else if(curLine.find(" * ") != string::npos)
-      {
-         //cout << "Multiplication Statement: " << curLine << endl;
+
+      else if (curLine.find(" * ") != string::npos)
          mulop();
-      }
-      else if(curLine.find(" / ") != string::npos)
-      {
-         //cout << "Division Statement: " << curLine << endl;
+
+      else if (curLine.find(" / ") != string::npos)
          divop();
-      }
-      else if(curLine[0] == 'r')
-      {
-         //cout << "Read Statement: " << curLine << endl;
+
+      else if (curLine[0] == 'r')
          readop();
-      }
-      else if(curLine[0] == 'w')
-      {
-         //cout << "Write Statement: " << curLine << endl;
+
+      else if (curLine[0] == 'w')
          printop();
-      }
+
       else if (curLine.find("_AX") != string::npos)
-      {
-         //cout << "Return Statement: " << curLine << endl;
          retop();
-      }
+
       else if (curLine.find(" = ") != string::npos)
-      {
-         //cout << "Single Assignment Statement: " << curLine << endl;
          assign();
-      }
+
       else
-      {
          cout << "Unknown Statement: " << curLine << endl;
-      }
       
       GetNextLine();
       found = curLine.find("endp");
@@ -307,9 +287,7 @@ void CodeGen::assign()
    size_t space2 = curLine.rfind(" ");
    
    string left = curLine.substr(0, space1);
-   string right = curLine.substr(space2+1);
-   
-   //cout << "Left: " << left << " Right: " << right << endl;
+   string right = curLine.substr(space2 + 1);
    
    code += "\tmov AX," + right;
    code += "\n\tmov " + left + ",AX";
@@ -327,7 +305,7 @@ void CodeGen::pushParam()
    string code;
    
    size_t space = curLine.find(" ");
-   string right = curLine.substr(space+1);
+   string right = curLine.substr(space + 1);
    
    code += "\tmov AX, " + right;
    
@@ -349,10 +327,10 @@ void CodeGen::addop()
    size_t space2 = curLine.rfind(" + ");
    
    string left = curLine.substr(0, space1);
-   string right = curLine.substr(space2+3);
+   string right = curLine.substr(space2 + 3);
    
    int length = curLine.size() - (left.size() + 3 + 3 + right.size());
-   string middle = curLine.substr(space1+3, length);
+   string middle = curLine.substr(space1 + 3, length);
    
    code += "\tmov BX," + right;
    code += "\n\tmov AX," + middle;
@@ -375,10 +353,10 @@ void CodeGen::subop()
    size_t space2 = curLine.rfind(" - ");
    
    string left = curLine.substr(0, space1);
-   string right = curLine.substr(space2+3);
+   string right = curLine.substr(space2 + 3);
    
    int length = curLine.size() - (left.size() + 3 + 3 + right.size());
-   string middle = curLine.substr(space1+3, length);
+   string middle = curLine.substr(space1 + 3, length);
    
    code += "\tmov BX," + right;
    code += "\n\tmov AX," + middle;
@@ -401,10 +379,10 @@ void CodeGen::mulop()
    size_t space2 = curLine.rfind(" * ");
    
    string left = curLine.substr(0, space1);
-   string right = curLine.substr(space2+3);
+   string right = curLine.substr(space2 + 3);
    
    int length = curLine.size() - (left.size() + 3 + 3 + right.size());
-   string middle = curLine.substr(space1+3, length);
+   string middle = curLine.substr(space1 + 3, length);
    
    code += "\tmov BX," + right;
    code += "\n\tmov AX," + middle;
@@ -427,10 +405,10 @@ void CodeGen::divop()
    size_t space2 = curLine.rfind(" / ");
    
    string left = curLine.substr(0, space1);
-   string right = curLine.substr(space2+3);
+   string right = curLine.substr(space2 + 3);
    
    int length = curLine.size() - (left.size() + 3 + 3 + right.size());
-   string middle = curLine.substr(space1+3, length);
+   string middle = curLine.substr(space1 + 3, length);
    
    code += "\tmov DX, 0";
    code += "\n\tmov CX," + right;
@@ -451,9 +429,9 @@ void CodeGen::readop()
    string code;
    
    size_t space = curLine.find(" ");
-   string right = curLine.substr(space+1);
+   string right = curLine.substr(space + 1);
    
-   if(curLine[2] == 'i')
+   if (curLine[2] == 'i')
       code += "\tcall readint";
    else
       code += "\tcall readch";
@@ -472,30 +450,30 @@ void CodeGen::printop()
 {
    string code;
    
-   if(curLine[2] == 'i')
+   if (curLine[2] == 'i')
    {
       size_t space = curLine.find(" ");
-      string right = curLine.substr(space+1);
+      string right = curLine.substr(space + 1);
       
       code += "\tmov AX," + right;
       code += "\n\tcall writeint";
    }
-   else if(curLine[2] == 'c')
+   else if (curLine[2] == 'c')
    {
       size_t space = curLine.find(" ");
-      string right = curLine.substr(space+1);
+      string right = curLine.substr(space + 1);
       
       code += "\tmov AX," + right;
       code += "\n\tcall writech";
    }
-   else if(curLine[2] == 't')
+   else if (curLine[2] == 't')
    {
       code += "\tcall writeln";
    }
    else
    {
       size_t space = curLine.find(" ");
-      string right = curLine.substr(space+1);
+      string right = curLine.substr(space + 1);
       
       code += "\tmov DX, offset " + right;
       code += "\n\tcall writestr";
@@ -514,7 +492,7 @@ void CodeGen::retop()
    string code;
    
    size_t space2 = curLine.rfind(" ");
-   string right = curLine.substr(space2+1);
+   string right = curLine.substr(space2 + 1);
    
    code += "\tmov AX," + right;
    
@@ -531,7 +509,7 @@ void CodeGen::fnCall()
    string code;
    
    size_t space2 = curLine.rfind(" ");
-   string right = curLine.substr(space2+1);
+   string right = curLine.substr(space2 + 1);
    
    code += "\tcall " + right;
    
@@ -559,7 +537,7 @@ void CodeGen::writeToFile()
    ofstream asm_file;
    asm_file.open(filename.c_str(), ios::trunc);
    
-   for(int i = 0; i < asm_code.size(); i++)
+   for (int i = 0; i < asm_code.size(); i++)
       asm_file << asm_code[i] << endl;
    
    asm_file.close();

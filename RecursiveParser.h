@@ -1,6 +1,5 @@
 //
 //  RecursiveParser.h
-//  446_A7
 //
 //  Created by Tyler McEntee on 2/16/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.
@@ -96,14 +95,14 @@ private:
       cout << left << setw(20) << location;
       cout << setw(15) << left << EnumToString(global->Token);
       cout << setw(35) << global->Lexeme;
-      if(global->Token == Global::numt)
+      if (global->Token == Global::numt)
       {
-         if(lex->isFloat)
+         if (lex->isFloat)
             cout << setw(35) << global->ValueR;
          else
             cout << setw(35) << global->Value;
       }
-      if(global->Token == Global::literalt)
+      if (global->Token == Global::literalt)
          cout << setw(35) << global->Literal;
       
       cout << endl;

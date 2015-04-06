@@ -1,6 +1,5 @@
 //
 //  LexicalAnalyzer.h
-//  446_A3
 //
 //  Created by Tyler McEntee on 1/26/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.

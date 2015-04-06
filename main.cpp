@@ -1,6 +1,5 @@
 //
 //  main.cpp
-//  446_A5
 //
 //  Created by Tyler McEntee on 3/31/14.
 //  Copyright (c) 2014 Tyler McEntee. All rights reserved.
@@ -29,12 +28,12 @@ int main(int argc, char *argv[])
    RecursiveParser rdp(lex.global, lex, sym);
    lex.GetNextToken();
    
-   while(lex.global.Token == Global::commentt)
+   while (lex.global.Token == Global::commentt)
       lex.GetNextToken();
    
    rdp.PROG();
    
-   if(lex.global.Token == Global::eoft)
+   if (lex.global.Token == Global::eoft)
       cout << "Success! -    Press ENTER to Continue" << endl;
    else
       cout << "Error: eoft not found." << endl;
@@ -55,13 +54,6 @@ int main(int argc, char *argv[])
 
 void print()
 {
-   cout << "/*****************************************************************************\n"
-        << "***  Assignment   : A8                                                     ***\n"
-        << "******************************************************************************\n"
-        << "***  Author  :  Tyler McEntee                                              ***\n"
-        << "******************************************************************************\n"
-        << "***  DESCRIPTION  : Full Compiler - Added codegen                          ***\n"
-        << "******************************************************************************\n\n\n";
 }
 
 
