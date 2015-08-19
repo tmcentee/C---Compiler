@@ -21,13 +21,13 @@ class Global
 {
 public:
     enum Symbol {
-       ift, elset, whilet, floatt, intt, chart,
+       ift = 0, elset, whilet, floatt, intt, chart,
        breakt, continuet, constt, voidt, cint, coutt, endlt, returnt, assignopt, relopt, mulopt, lparent, rparent, lbracet, rbracet, lbrackett, rbrackett,
        commat, periodt, addopt, numt, wordt, idt, semicolont, literalt, instreamt, outstreamt, commentt, nott, eoft, unknownt
     };
-    
+
    Global() { }
-   
+
     string Lexeme;
     Symbol Token;
     int Value;

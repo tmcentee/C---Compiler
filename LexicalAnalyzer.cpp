@@ -23,17 +23,17 @@ LexicalAnalyzer::LexicalAnalyzer(string source_filename)
 {
    global.Lexeme = string();
    filename = source_filename;
-   
+
    stream_pos = 0;
    line_num = 1;
-   
+
    done = false;
-   
+
    isFloat = false;
-    
+
    ifstream source_file;
    source_file.open(filename.c_str());
-   
+
    if (!source_file)
       cerr << "File not found: " << filename << endl;
    else
@@ -42,7 +42,7 @@ LexicalAnalyzer::LexicalAnalyzer(string source_filename)
       //stringstreams are easier to work with than basic file streams.
       file_stream << source_file.rdbuf();
       source_file.close();
-       
+
       buildResWords();
    }
 }
@@ -55,10 +55,10 @@ LexicalAnalyzer::LexicalAnalyzer(string source_filename)
 void LexicalAnalyzer::GetNextToken()
 {
     global.Lexeme = string();
-   
+
     if (file_stream.str().length() == stream_pos)
        done = true;
-    
+
     while (ch <= ' ' && !done)
     {
        GetNextChar();
@@ -66,7 +66,7 @@ void LexicalAnalyzer::GetNextToken()
        if (file_stream.str().length() <= stream_pos)
           done = true;
     }
-   
+
    if (!done)
    {
       ProcessToken();
@@ -76,7 +76,7 @@ void LexicalAnalyzer::GetNextToken()
       global.Token = Global::eoft;
       done = true;
    }
-    
+
    return;
 }
 
@@ -100,24 +100,24 @@ void LexicalAnalyzer::GetNextChar()
 void LexicalAnalyzer::ProcessToken()
 {
    global.Lexeme += ch;
-   
+
    if (isalpha(global.Lexeme[0]))
       ProcessWordToken();
-   
+
    else if (isdigit(global.Lexeme[0]))
       ProcessNumToken();
-   
+
    else if (global.Lexeme[0] == '/' && LookAhead() == '*')
       ProcessComment();
-   
+
    else if (global.Lexeme[0] == '\'' || global.Lexeme[0] == '\"')
       ProcessLiteralToken();
-   
+
    else if (global.Lexeme[0] == '<' || global.Lexeme[0] == '>' || global.Lexeme[0] == '=' || global.Lexeme[0] == '!' ||
            global.Lexeme[0] == '&' || global.Lexeme[0] == '|')
    {
       char ch_t = global.Lexeme[0];
-      
+
       if (ch_t == '<' && LookAhead() == '<')
          ProcessStreamOp();
 
@@ -133,7 +133,7 @@ void LexicalAnalyzer::ProcessToken()
       else
          ProcessSingleCharToken();
    }
-   
+
    else
       ProcessSingleCharToken();
 }
@@ -146,7 +146,7 @@ void LexicalAnalyzer::ProcessToken()
 void LexicalAnalyzer::ProcessStreamOp()
 {
    GetNextChar();
-   
+
    if (global.Lexeme[0] == '>')
       global.Token = Global::instreamt;
 
@@ -155,7 +155,7 @@ void LexicalAnalyzer::ProcessStreamOp()
 
    else
       global.Token = Global::unknownt;
-   
+
    GetNextChar();
 }
 
@@ -176,7 +176,7 @@ void LexicalAnalyzer::ProcessComment()
          return;
       }
    }
-   
+
    GetNextChar();
    GetNextChar();
    global.Lexeme = string();
@@ -192,7 +192,7 @@ char LexicalAnalyzer::LookAhead()
 {
    char peek = file_stream.get();
    file_stream.putback(peek);
-   
+
    return peek;
 }
 
@@ -204,19 +204,19 @@ char LexicalAnalyzer::LookAhead()
 void LexicalAnalyzer::ProcessWordToken()
 {
    GetNextChar();
-   
+
    while (isdigit(ch) || isalpha(ch) || ch == '_')
    {
       global.Lexeme += ch;
       GetNextChar();
    }
-   
+
    if (global.Lexeme.length() > 31)
    {
       global.Lexeme = string("ERROR: LEXEME GREATER THAN 31 CHARACTERS.");
       global.Token = Global::unknownt;
    }
-   
+
    else
    {
       for (int i = Global::ift; i < Global::returnt + 2; i++)
@@ -227,7 +227,7 @@ void LexicalAnalyzer::ProcessWordToken()
             return;
          }
       }
-      
+
       global.Token = Global::idt;
    }
 }
@@ -240,21 +240,21 @@ void LexicalAnalyzer::ProcessWordToken()
 void LexicalAnalyzer::ProcessNumToken()
 {
    GetNextChar();
-   
+
    isFloat = false;
-   
+
    while (isdigit(ch))
    {
       global.Lexeme += ch;
       GetNextChar();
    }
-   
+
    if (ch == '.')
    {
       global.Lexeme += ch;
-      
+
       GetNextChar();
-      
+
       if (isdigit(ch))
       {
          while (isdigit(ch))
@@ -275,7 +275,7 @@ void LexicalAnalyzer::ProcessNumToken()
          return;
       }
    }
-   
+
    if (global.Lexeme.length() > 31)
    {
       global.Lexeme = string("ERROR: LEXEME GREATER THAN 31 CHARACTERS.");
@@ -285,7 +285,7 @@ void LexicalAnalyzer::ProcessNumToken()
    else
    {
       size_t found  = global.Lexeme.find(".");
-      
+
       if (found < global.Lexeme.length())
       {
          global.ValueR = atof(global.Lexeme.c_str());
@@ -297,7 +297,7 @@ void LexicalAnalyzer::ProcessNumToken()
          isFloat = false;
       }
    }
-   
+
    global.Token = Global::numt;
 }
 
@@ -309,10 +309,10 @@ void LexicalAnalyzer::ProcessNumToken()
 void LexicalAnalyzer::ProcessLiteralToken()
 {
    bool illegal = false;
-   
+
    GetNextChar();
    global.Lexeme += ch;
-   
+
    while (ch != global.Lexeme[0])
    {
       GetNextChar();
@@ -322,10 +322,10 @@ void LexicalAnalyzer::ProcessLiteralToken()
          illegal = true;
          break;
       }
-      
+
       global.Lexeme += ch;
    }
-   
+
    if (!illegal)
    {
       global.Token = Global::literalt;
@@ -336,7 +336,7 @@ void LexicalAnalyzer::ProcessLiteralToken()
       global.Token = Global::unknownt;
       global.Lexeme = string("ERROR: INVALID LITERAL");
    }
-   
+
    GetNextChar();
 }
 
@@ -352,23 +352,23 @@ void LexicalAnalyzer::ProcessSingleCharToken()
       case '=':
          global.Token = Global::assignopt;
          break;
-         
+
       case '<':
       case '>':
          global.Token = Global::relopt;
          break;
-         
+
       case '+':
       case '-':
          global.Token = Global::addopt;
          break;
-         
+
       case '*':
       case '/':
       case '%':
          global.Token = Global::mulopt;
          break;
-      
+
       case '(':
          global.Token = Global::lparent;
          break;
@@ -399,12 +399,12 @@ void LexicalAnalyzer::ProcessSingleCharToken()
       case '!':
          global.Token = Global::nott;
          break;
-         
+
       default:
          global.Token = Global::unknownt;
       break;
    }
-   
+
    GetNextChar();
 }
 
@@ -443,7 +443,7 @@ void LexicalAnalyzer::Print()
 
       if (global.Token == Global::literalt)
          cout << setw(35) << global.Literal;
-     
+
       cout << endl;
    }
 }
@@ -455,25 +455,20 @@ void LexicalAnalyzer::Print()
  ******************************************************************************/
 void LexicalAnalyzer::buildResWords()
 {
-      //enums start at 1 so put null string at zeroth spot
-      reswords.push_back(string());
+      reswords.push_back("if");
+      reswords.push_back("else");
+      reswords.push_back("while");
+      reswords.push_back("float");
+      reswords.push_back("int");
+      reswords.push_back("char");
+      reswords.push_back("break");
+      reswords.push_back("continue");
+      reswords.push_back("const");
+      reswords.push_back("void");
+      reswords.push_back("cin");
+      reswords.push_back("cout");
+      reswords.push_back("endl");
+      reswords.push_back("return");
 
-      reswords.push_back(string("if"));
-      reswords.push_back(string("else"));
-      reswords.push_back(string("while"));
-      reswords.push_back(string("float"));
-      reswords.push_back(string("int"));
-      reswords.push_back(string("char"));
-      reswords.push_back(string("break"));
-      reswords.push_back(string("continue"));
-      reswords.push_back(string("const"));
-      reswords.push_back(string("void"));
-      reswords.push_back(string("cin"));
-      reswords.push_back(string("cout"));
-      reswords.push_back(string("endl"));
-      reswords.push_back(string("return"));
-   
-    
     return;
 }
-
