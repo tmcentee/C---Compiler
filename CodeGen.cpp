@@ -29,16 +29,16 @@ CodeGen::CodeGen(Global & global_init, SymbolTable & symtab_init, string tacFile
 {
    global = &global_init;
    symtab = &symtab_init;
-   
+
    stream_pos = 0;
    str_offset = 0;
    str_num = 0;
    var_offset = 0;
-   
+
    done = false;
-   
+
    filename = tacFile;
-   
+
    //couldn't get rfind() and replace() working together so this is what I did.
    for (int i = 0; i < filename.length(); i++)
    {
@@ -48,15 +48,15 @@ CodeGen::CodeGen(Global & global_init, SymbolTable & symtab_init, string tacFile
          i = 50000;
       }
    }
-   
+
    ifstream source_file;
    source_file.open(tacFile.c_str());
-   
+
    tacstream << source_file.rdbuf();
    source_file.close();
-   
+
    GetNextChar();
-   
+
    init();
 }
 
@@ -78,22 +78,22 @@ CodeGen::~CodeGen()
 void CodeGen::init()
 {
    string code;
-   
+
    code += "\t.model small\n\t.stack 100h\n\t.data";
    emit(code);
-   
+
    data_init();
    code_init();
-   
+
    //Get first line in the file.
    GetNextLine();
-   
+
    while (curLine[0] == 'p' && !done)
       proc_init();
-      
-   
+
+
    final_init();
-   
+
 }
 
 /*******************************************************************************
@@ -104,11 +104,11 @@ void CodeGen::init()
 void CodeGen::data_init()
 {
    string code;
-   
+
    for (int i = 0; i < symtab->table_size; i++)
    {
       code = "";
-      
+
       for (int k = 0; k < symtab->table[i].size(); k++)
       {
          if (symtab->table[i][k].depth == 1 && symtab->table[i][k].TypeOfEntry != functionEntry)
@@ -145,10 +145,10 @@ void CodeGen::data_init()
 void CodeGen::final_init()
 {
    string code;
-   
+
    code = "\n\n_startproc PROC\n\tmov ax, @data\n\tmov ds, ax\n\tcall main\n\tmov ax, 4c00h";
    code += "\n\tint 21h\n_startproc ENDP\n\tEND _startproc";
-   
+
    emit(code);
 }
 
@@ -161,7 +161,7 @@ void CodeGen::GetNextChar()
 {
    ch = tacstream.get();
 
-   if (stream_pos > tacstream.str().length()) 
+   if (stream_pos > tacstream.str().length())
       done = true;
 
    stream_pos++;
@@ -175,15 +175,15 @@ void CodeGen::GetNextChar()
 void CodeGen::GetNextLine()
 {
    curLine = string();
-   
+
    while (ch != '\n' && !done)
    {
       curLine += ch;
       GetNextChar();
    }
-   
+
    GetNextChar();
-   
+
    return;
 }
 
@@ -195,10 +195,10 @@ void CodeGen::GetNextLine()
 void CodeGen::code_init()
 {
    string code;
-   
+
    code += "\t.code\n";
    code += "\tinclude io.asm";
-   
+
    emit(code);
 }
 
@@ -210,19 +210,19 @@ void CodeGen::code_init()
 void CodeGen::proc_init()
 {
    string code;
-   
+
    string procname = curLine.substr(5);
-   
+
    int size = symtab->lookupT(procname).function.SizeOfLocal;
-   
+
    code +=  procname + " PROC\n";
    code += "\tpush BP\n";
    code += "\tmov bp,sp\n";
    code += "\tsub sp, " + num2str(size);
    emit(code);
-   
+
    GetNextLine();
-   
+
    size_t found = curLine.find("endp");
    while (found == std::string::npos)
    {
@@ -235,7 +235,7 @@ void CodeGen::proc_init()
       else if (curLine.find("call ") != string::npos)
          fnCall();
 
-      else if (curLine.find(" - ") != string::npos);
+      else if (curLine.find(" - ") != string::npos)
          subop();
 
       else if (curLine.find(" * ") != string::npos)
@@ -258,18 +258,18 @@ void CodeGen::proc_init()
 
       else
          cout << "Unknown Statement: " << curLine << endl;
-      
+
       GetNextLine();
       found = curLine.find("endp");
    }
-   
+
    code = "\tadd sp," + num2str(size);
    code += "\n\tpop bp";
    code += "\n\tret " + num2str(symtab->lookup(procname)->function.sizeOfParams);
    code += "\n" + procname + " ENDP";
    var_offset = 0;
    emit(code);
-   
+
    GetNextLine();
    GetNextLine();
 }
@@ -282,16 +282,16 @@ void CodeGen::proc_init()
 void CodeGen::assign()
 {
    string code;
-   
+
    size_t space1 = curLine.find(" ");
    size_t space2 = curLine.rfind(" ");
-   
+
    string left = curLine.substr(0, space1);
    string right = curLine.substr(space2 + 1);
-   
+
    code += "\tmov AX," + right;
    code += "\n\tmov " + left + ",AX";
-   
+
    emit(code);
 }
 
@@ -303,14 +303,14 @@ void CodeGen::assign()
 void CodeGen::pushParam()
 {
    string code;
-   
+
    size_t space = curLine.find(" ");
    string right = curLine.substr(space + 1);
-   
+
    code += "\tmov AX, " + right;
-   
+
    code += "\n\tpush AX";
-   
+
    emit(code);
 }
 
@@ -322,21 +322,21 @@ void CodeGen::pushParam()
 void CodeGen::addop()
 {
    string code;
-   
+
    size_t space1 = curLine.find(" = ");
    size_t space2 = curLine.rfind(" + ");
-   
+
    string left = curLine.substr(0, space1);
    string right = curLine.substr(space2 + 3);
-   
+
    int length = curLine.size() - (left.size() + 3 + 3 + right.size());
    string middle = curLine.substr(space1 + 3, length);
-   
+
    code += "\tmov BX," + right;
    code += "\n\tmov AX," + middle;
    code += "\n\tadd AX,BX";
    code += "\n\tmov " + left + ",AX";
-   
+
    emit(code);
 }
 
@@ -348,21 +348,21 @@ void CodeGen::addop()
 void CodeGen::subop()
 {
    string code;
-   
+
    size_t space1 = curLine.find(" = ");
    size_t space2 = curLine.rfind(" - ");
-   
+
    string left = curLine.substr(0, space1);
    string right = curLine.substr(space2 + 3);
-   
+
    int length = curLine.size() - (left.size() + 3 + 3 + right.size());
    string middle = curLine.substr(space1 + 3, length);
-   
+
    code += "\tmov BX," + right;
    code += "\n\tmov AX," + middle;
    code += "\n\tsub AX,BX";
    code += "\n\tmov " + left + ",AX";
-   
+
    emit(code);
 }
 
@@ -374,21 +374,21 @@ void CodeGen::subop()
 void CodeGen::mulop()
 {
    string code;
-   
+
    size_t space1 = curLine.find(" = ");
    size_t space2 = curLine.rfind(" * ");
-   
+
    string left = curLine.substr(0, space1);
    string right = curLine.substr(space2 + 3);
-   
+
    int length = curLine.size() - (left.size() + 3 + 3 + right.size());
    string middle = curLine.substr(space1 + 3, length);
-   
+
    code += "\tmov BX," + right;
    code += "\n\tmov AX," + middle;
    code += "\n\timul BX";
    code += "\n\tmov " + left + ",AX";
-   
+
    emit(code);
 }
 
@@ -400,22 +400,22 @@ void CodeGen::mulop()
 void CodeGen::divop()
 {
    string code;
-   
+
    size_t space1 = curLine.find(" = ");
    size_t space2 = curLine.rfind(" / ");
-   
+
    string left = curLine.substr(0, space1);
    string right = curLine.substr(space2 + 3);
-   
+
    int length = curLine.size() - (left.size() + 3 + 3 + right.size());
    string middle = curLine.substr(space1 + 3, length);
-   
+
    code += "\tmov DX, 0";
    code += "\n\tmov CX," + right;
    code += "\n\tmov AX," + middle;
    code += "\n\tidiv CX";
    code += "\n\tmov " + left + ",AX";
-   
+
    emit(code);
 }
 
@@ -427,17 +427,17 @@ void CodeGen::divop()
 void CodeGen::readop()
 {
    string code;
-   
+
    size_t space = curLine.find(" ");
    string right = curLine.substr(space + 1);
-   
+
    if (curLine[2] == 'i')
       code += "\tcall readint";
    else
       code += "\tcall readch";
-   
+
    code += "\n\tmov " + right + ",BX";
-   
+
    emit(code);
 }
 
@@ -449,12 +449,12 @@ void CodeGen::readop()
 void CodeGen::printop()
 {
    string code;
-   
+
    if (curLine[2] == 'i')
    {
       size_t space = curLine.find(" ");
       string right = curLine.substr(space + 1);
-      
+
       code += "\tmov AX," + right;
       code += "\n\tcall writeint";
    }
@@ -462,7 +462,7 @@ void CodeGen::printop()
    {
       size_t space = curLine.find(" ");
       string right = curLine.substr(space + 1);
-      
+
       code += "\tmov AX," + right;
       code += "\n\tcall writech";
    }
@@ -474,11 +474,11 @@ void CodeGen::printop()
    {
       size_t space = curLine.find(" ");
       string right = curLine.substr(space + 1);
-      
+
       code += "\tmov DX, offset " + right;
       code += "\n\tcall writestr";
    }
-   
+
    emit(code);
 }
 
@@ -490,12 +490,12 @@ void CodeGen::printop()
 void CodeGen::retop()
 {
    string code;
-   
+
    size_t space2 = curLine.rfind(" ");
    string right = curLine.substr(space2 + 1);
-   
+
    code += "\tmov AX," + right;
-   
+
    emit(code);
 }
 
@@ -507,12 +507,12 @@ void CodeGen::retop()
 void CodeGen::fnCall()
 {
    string code;
-   
+
    size_t space2 = curLine.rfind(" ");
    string right = curLine.substr(space2 + 1);
-   
+
    code += "\tcall " + right;
-   
+
    emit(code);
 }
 
@@ -536,10 +536,9 @@ void CodeGen::writeToFile()
 {
    ofstream asm_file;
    asm_file.open(filename.c_str(), ios::trunc);
-   
+
    for (int i = 0; i < asm_code.size(); i++)
       asm_file << asm_code[i] << endl;
-   
+
    asm_file.close();
 }
-
