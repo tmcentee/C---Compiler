@@ -20,9 +20,9 @@ void SymbolTable::insert(string lex, Global::Symbol token, int depth)
    new_entry.Token = token;
    new_entry.Lexeme = lex;
    new_entry.depth = depth;
-   
+
    int hash_val = hash(lex.c_str());
-   
+
    for (int i = 0; i < table[hash_val].size(); i++)
    {
       if (table[hash_val][i].Lexeme == lex)
@@ -34,7 +34,7 @@ void SymbolTable::insert(string lex, Global::Symbol token, int depth)
          }
       }
    }
-   
+
    table[hash_val].insert(table[hash_val].begin(), new_entry);
 }
 
@@ -46,7 +46,7 @@ void SymbolTable::insert(string lex, Global::Symbol token, int depth)
 EntryPtr SymbolTable::lookup(string lex)
 {
    TableEntry lookup;
-   
+
    for (int i = 0; i < table_size; i++)
    {
       for (int k = 0; k < table[i].size(); k++)
@@ -55,9 +55,9 @@ EntryPtr SymbolTable::lookup(string lex)
             return &table[i][k];
       }
    }
-   
+
    lookup.Lexeme = string("::ERROR::");
-   
+
    return &lookup;
 }
 
@@ -69,7 +69,7 @@ EntryPtr SymbolTable::lookup(string lex)
 TableEntry SymbolTable::lookupT(string lex)
 {
    TableEntry lookup;
-   
+
    for (int i = 0; i < table_size; i++)
    {
       for (int k = 0; k < table[i].size(); k++)
@@ -78,9 +78,9 @@ TableEntry SymbolTable::lookupT(string lex)
             return table[i][k];
       }
    }
-   
+
    lookup.Lexeme = string("::ERROR::");
-   
+
    return lookup;
 }
 
@@ -106,18 +106,17 @@ void SymbolTable::deleteDepth(int depth)
  ***  FUNCTION writeTable()
  *******************************************************************************
  ***  DESCRIPTION  : Prints out all entries at a certain depth
- ***   (This is a bit gross, need to refactor)  
+ ***   (This is a bit gross, need to refactor)
  ******************************************************************************/
 void SymbolTable::writeTable(int depth)
 {
    cout << "TABLE AT DEPTH: " << depth << endl;
    cout << "------------------------------------" << endl;
-   
+
    for (int i = 0; i < table_size; i++)
    {
       for (int k = 0; k < table[i].size(); k++)
       {
-         int curr_depth = table[i][k].depth;
          //if depth found in vector, print that node
          if (table[i][k].depth == depth)
          {
@@ -137,14 +136,14 @@ void SymbolTable::writeTable(int depth)
             else if (table[i][k].TypeOfEntry == functionEntry)
             {
                cout << setw(21) << "Type: functionEntry" << setw(7) << "Class:" << setw(12) << VarTypeString(table[i][k].function.ReturnType) << setw(9) << "#Params:" << table[i][k].function.NumberOfParameters;
-               
+
                ParamPtr ptr = table[i][k].function.ParamList;
-               
-               
+
+
                if (ptr != NULL)
                {
                   cout << endl << setw(25) << " " << "Params: ";
-                  
+
                   while (ptr != NULL)
                   {
                      cout << setw(9) << VarTypeString(ptr->typeOfParameter);
@@ -152,10 +151,10 @@ void SymbolTable::writeTable(int depth)
                   }
                }
             }
-            
+
             else
                cout << setw(12) << "undefined";
-            
+
             cout << endl;
          }
       }
@@ -172,10 +171,10 @@ void SymbolTable::writeTable(int depth)
 int SymbolTable::hash(const char *str)
 {
    int hashVal = 0;
-   
+
    while (*str)
       hashVal = hashVal << 1 ^ *str++;
-   
+
    return hashVal % table_size;
 }
 
@@ -186,11 +185,11 @@ void SymbolTable::debug(string func)
 {
    cout << "CURRENT TABLE STRUCTRE - After: " << func <<  endl;
    cout << "----------------------" << endl;
-   
+
    for (int i = 0; i < table_size; i++)
    {
       cout << flush;
-      
+
       for (int k = 0; k < table[i].size(); k++)
       {
          //if depth found in vector, print that node
@@ -213,14 +212,14 @@ void SymbolTable::debug(string func)
          else if (table[i][k].TypeOfEntry == functionEntry)
          {
             cout << setw(21) << "Type: functionEntry" << setw(7) << "Class:" << setw(12) << VarTypeString(table[i][k].function.ReturnType) << setw(9) << "#Params:" << table[i][k].function.NumberOfParameters;
-            
+
             ParamPtr ptr = table[i][k].function.ParamList;
-            
-            
+
+
             if (ptr != NULL && table[i][k].function.NumberOfParameters != 0)
             {
                cout << endl << setw(25) << " " << "Params: ";
-               
+
                while (ptr != NULL)
                {
                   cout << setw(9) << VarTypeString(ptr->typeOfParameter);
@@ -228,10 +227,10 @@ void SymbolTable::debug(string func)
                }
             }
          }
-         
+
          else
             cout << setw(12) << "undefined";
-         
+
          cout << endl;
       }
    }
@@ -244,20 +243,15 @@ string VarTypeString(VarType in)
          case floatType:
          return string("floatType");
          break;
-         
+
          case intType:
          return string("intType");
          break;
-         
+
          case charType:
          return string("charType");
          break;
    }
-   
+
    return string("_ERROR_");
 }
-
-
-
-
-
